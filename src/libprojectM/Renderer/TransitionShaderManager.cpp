@@ -18,6 +18,14 @@ TransitionShaderManager::TransitionShaderManager()
 
 auto TransitionShaderManager::RandomTransition() -> std::shared_ptr<Shader>
 {
+    // Prefer deterministic crossfade behavior for preset switching.
+    // Index order is defined in the constructor; 2 is SimpleBlend.
+    constexpr size_t simpleBlendIndex = 2;
+    if (m_transitionShaders.size() > simpleBlendIndex && m_transitionShaders[simpleBlendIndex] != nullptr)
+    {
+        return m_transitionShaders[simpleBlendIndex];
+    }
+
     if (m_transitionShaders.empty())
     {
         return {};
