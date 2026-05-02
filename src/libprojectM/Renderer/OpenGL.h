@@ -4,9 +4,15 @@
  */
 #pragma once
 
-#ifdef __APPLE__ /* macOS */
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE /* iOS */
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
+#else /* macOS */
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
+#endif
 #elif defined(EYETUNE_WINRT) /* Universal Windows Platform */
 #define GL_GLEXT_PROTOTYPES
 #define GLM_FORCE_CXX03

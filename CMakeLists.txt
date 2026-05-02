@@ -125,6 +125,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     add_compile_definitions(GL_SILENCE_DEPRECATION)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL iOS)
+    # Silence OpenGL ES API deprecation warnings on iOS (deprecated since iOS 12, still functional).
+    add_compile_definitions(GLES_SILENCE_DEPRECATION)
+endif()
+
 if(ENABLE_EMSCRIPTEN)
     message(STATUS "${CMAKE_C_COMPILER} on ${CMAKE_SYSTEM_NAME}")
     check_symbol_exists(__EMSCRIPTEN__ "" HAVE_EMSCRIPTEN)
@@ -167,15 +172,26 @@ else()
     if(ENABLE_GLES)
         message(STATUS "Building for OpenGL Embedded Profile")
         if(NOT CMAKE_SYSTEM_NAME STREQUAL Linux
-                AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-            message(FATAL_ERROR "OpenGL ES 3 support is currently only available for Linux platforms. You're building for ${CMAKE_SYSTEM_NAME}.")
+                AND NOT CMAKE_SYSTEM_NAME STREQUAL Android
+                AND NOT CMAKE_SYSTEM_NAME STREQUAL iOS)
+            message(FATAL_ERROR "OpenGL ES 3 support is currently only available for Linux, Android and iOS platforms. You're building for ${CMAKE_SYSTEM_NAME}.")
         endif()
 
-        # We use a local find script for OpenGL::GLES3 until the proposed changes are merged upstream.
-        list(APPEND CMAKE_MODULE_PATH "${PROJECTM_SOURCE_DIR}/cmake/gles")
-        find_package(OpenGL REQUIRED COMPONENTS GLES3)
-        if(NOT TARGET OpenGL::GLES3)
-            message(FATAL_ERROR "No suitable GLES3 library was found.")
+        if(CMAKE_SYSTEM_NAME STREQUAL iOS)
+            # On iOS, OpenGL ES is provided by the system OpenGLES framework.
+            find_library(OPENGL_OPENGLES_FRAMEWORK OpenGLES REQUIRED)
+            if(NOT TARGET OpenGL::GLES3)
+                add_library(OpenGL::GLES3 INTERFACE IMPORTED)
+                set_target_properties(OpenGL::GLES3 PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${OPENGL_OPENGLES_FRAMEWORK}")
+            endif()
+        else()
+            # We use a local find script for OpenGL::GLES3 until the proposed changes are merged upstream.
+            list(APPEND CMAKE_MODULE_PATH "${PROJECTM_SOURCE_DIR}/cmake/gles")
+            find_package(OpenGL REQUIRED COMPONENTS GLES3)
+            if(NOT TARGET OpenGL::GLES3)
+                message(FATAL_ERROR "No suitable GLES3 library was found.")
+            endif()
         endif()
 
         set(PROJECTM_OPENGL_LIBRARIES OpenGL::GLES3)

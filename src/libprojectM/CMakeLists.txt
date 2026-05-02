@@ -41,7 +41,7 @@ target_link_libraries(projectM_main
         ${PROJECTM_FILESYSTEM_LIBRARY}
         )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(APPLE)
     target_link_libraries(projectM_main
             PUBLIC
             "-framework CoreFoundation"
@@ -91,7 +91,7 @@ target_link_libraries(projectM
         ${PROJECTM_FILESYSTEM_LIBRARY}
         )
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(APPLE)
     target_link_libraries(projectM
             PUBLIC
             "-framework CoreFoundation"

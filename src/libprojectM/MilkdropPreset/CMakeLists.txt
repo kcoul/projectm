@@ -97,7 +97,7 @@ add_library(MilkdropPreset OBJECT
         Waveforms/DoubleLine.hpp
         Waveforms/ExplosiveHash.cpp
         Waveforms/ExplosiveHash.hpp
-        Waveforms/Factory.cpp
+        Waveforms/WaveformFactory.cpp
         Waveforms/Factory.hpp
         Waveforms/Line.cpp
         Waveforms/Line.hpp
