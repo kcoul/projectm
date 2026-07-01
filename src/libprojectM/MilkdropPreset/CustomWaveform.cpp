@@ -161,7 +161,6 @@ void CustomWaveform::Draw(const PerFrameContext& presetPerFrameContext)
 
 #ifndef USE_GLES
     glDisable(GL_LINE_SMOOTH);
-    glEnable(GL_PROGRAM_POINT_SIZE);
 #endif
     glLineWidth(1);
 
@@ -178,17 +177,13 @@ void CustomWaveform::Draw(const PerFrameContext& presetPerFrameContext)
     auto shader = m_presetState.untexturedShader.lock();
     shader->Bind();
     shader->SetUniformMat4x4("vertex_transformation", PresetState::orthogonalProjection);
-    // Dots use gl_PointSize; lines use the 4-pass pixel-offset approach below.
-    // Use a larger size for thick dots so they're visible on HiDPI displays.
-    float pointSize = m_useDots ? (m_drawThick ? 12.0f : 3.0f) : 1.0f;
-    shader->SetUniformFloat("vertex_point_size", pointSize);
+    shader->SetUniformFloat("vertex_point_size", m_drawThick ? 2.0f : 1.0f);
 
     auto iterations = (m_drawThick && !m_useDots) ? 4 : 1;
 
-    // The ortho projection maps [-1,1] to [0,W], so 1 pixel = 2.0/viewportSize in clip space.
-    // Using 2.0/W here gives a 1-pixel offset per step, producing a proper 2x2-pixel thick line.
-    auto incrementX = 2.0f / static_cast<float>(m_presetState.renderContext.viewportSizeX);
-    auto incrementY = 2.0f / static_cast<float>(m_presetState.renderContext.viewportSizeY);
+    // Need to use +/- 1.0 here instead of 2.0 used in Milkdrop to achieve the same rendering result.
+    auto incrementX = 1.0f / static_cast<float>(m_presetState.renderContext.viewportSizeX);
+    auto incrementY = 1.0f / static_cast<float>(m_presetState.renderContext.viewportSizeX);
 
     size_t smoothedVertexCount = m_mesh.Indices().Size();
 
